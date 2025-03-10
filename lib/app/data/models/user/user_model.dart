@@ -37,6 +37,8 @@ class UserModel extends Equatable {
       id: f.faker.randomGenerator.integer(100),
       fullName: f.faker.person.name(),
       emailAddress: f.faker.internet.email(),
+      imageUrl: f.faker.image.loremPicsum(random: 1),
+      lastLoggedIn: f.faker.date.dateTime(),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,11 +14,47 @@ class SignInView extends ConsumerWidget {
     return Scaffold(
       body: Center(child: Text('SignInView is working')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ref.read(userRepoProvider).isLoggedIn = true;
-          context.router.replacePath('/client/bottom-nav');
+        onPressed: () async {
+          final _result = await showAsyncOverlay(
+            context,
+            asyncFunction:
+                () async => await Future.delayed(Duration(seconds: 10)),
+          );
         },
       ),
     );
   }
+}
+
+Future<T?> showAsyncOverlay<T>(
+  BuildContext context, {
+  required Future<T> Function() asyncFunction,
+}) async {
+  final cancelableOperation = CancelableOperation<T>.fromFuture(
+    asyncFunction(),
+  );
+
+  return await showDialog<T>(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      cancelableOperation.then(
+        (value) => Navigator.of(dialogContext).pop(value),
+        onCancel: () => Navigator.of(dialogContext).pop(),
+      );
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!cancelableOperation.isCanceled) {
+            cancelableOperation.cancel();
+            Navigator.of(dialogContext).pop();
+          }
+        },
+        child: Center(child: CircularProgressIndicator()),
+      );
+    },
+  ).then((value) {
+    if (cancelableOperation.isCanceled) return null;
+    return value;
+  });
 }
