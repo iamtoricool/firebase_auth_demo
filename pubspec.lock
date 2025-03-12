@@ -217,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  fdevs_fitkit:
+    dependency: "direct main"
+    description:
+      name: fdevs_fitkit
+      sha256: e462b2d94a0ec015f92ce0453c5291d938ee85deba926ff49238da797d16e970
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1+3"
   ffi:
     dependency: transitive
     description:

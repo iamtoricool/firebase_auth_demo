@@ -1,24 +1,39 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/models.export.dart';
 
-export '../../models/models.export.dart' show UserModel;
+export 'package:firebase_auth/firebase_auth.dart' show User;
 
-class UserRepo extends StateNotifier<UserModel?> {
-  UserRepo() : super(null);
+class UserRepo extends AsyncNotifier<User?> {
+  @override
+  FutureOr<User?> build() async {
+    return await getUser();
+  }
 
-  bool get isLoggedIn => state != null;
+  bool get isLoggedIn => state.value != null;
+  Future<User?> getUser() async {
+    return FirebaseAuth.instance.currentUser;
+  }
 
-  Future<MapEntry<String?, UserModel?>> signIn() async {
-    await Future.delayed(Duration(seconds: 2));
-    print('Signed In!');
+  Future<MapEntry<String?, User?>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final _result = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    final user = UserModel.mock().copyWith(lastLoggedIn: DateTime.now());
-    state = user;
-
-    return MapEntry(null, user);
+      state = AsyncValue.data(_result.user);
+      return MapEntry(null, state.value);
+    } catch (e) {
+      return MapEntry(e.toString(), null);
+    }
   }
 }
 
-final userRepoProvider = StateNotifierProvider<UserRepo, UserModel?>(
-  (ref) => UserRepo(),
+final userRepoProvider = AsyncNotifierProvider<UserRepo, User?>(
+  () => UserRepo(),
 );

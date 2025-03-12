@@ -1,5 +1,5 @@
-import 'package:async/async.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fdevs_fitkit/fdevs_fitkit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,50 +11,106 @@ class SignInView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Center(child: Text('SignInView is working')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Future.delayed(
-            Durations.extralong4,
-            () => ref.read(userRepoProvider.notifier).signIn(),
+    final controller = ref.watch(signInViewNotifier);
+    return Form(
+      child: Builder(
+        builder: (formContext) {
+          return Scaffold(
+            body: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextFormField(
+                      controller: controller.emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Email khan',
+                        hintText: 'Mara khan',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please mara khan';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: controller.passwordController,
+                      keyboardType: TextInputType.visiblePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password khan',
+                        hintText: 'Mara khan',
+                      ),
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please ektu mara khan';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox.square(dimension: 24),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (Form.maybeOf(formContext)?.validate() == true) {
+                          return await _handleFormSubmit(context, ref);
+                        }
+                      },
+                      child: Text('Sign In'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
-          context.router.replacePath('/client');
         },
       ),
     );
   }
+
+  Future<void> _handleFormSubmit(BuildContext ctx, WidgetRef ref) async {
+    final _result = await showAsyncLoadingOverlay(
+      ctx,
+      asyncFunction: ref.read(signInViewNotifier).handleSignIn,
+      loadingWidget: Center(child: CircularProgressIndicator()),
+    );
+
+    if (ctx.mounted) {
+      if (_result.key != null) {
+        showCustomSnackBar(
+          ctx,
+          content: Text(_result.key!),
+          customSnackBarType: CustomOverlayType.error,
+        );
+        return;
+      }
+
+      return ctx.router.replacePath<void>('/client');
+    }
+  }
 }
 
-Future<T?> showAsyncOverlay<T>(
-  BuildContext context, {
-  required Future<T> Function() asyncFunction,
-}) async {
-  final cancelableOperation = CancelableOperation<T>.fromFuture(
-    asyncFunction(),
-  );
+class SignInViewProvider extends ChangeNotifier {
+  SignInViewProvider(this.ref) : _repo = ref.read(userRepoProvider.notifier);
 
-  return await showDialog<T>(
-    context: context,
-    barrierDismissible: false,
-    builder: (dialogContext) {
-      cancelableOperation.then(
-        (value) => Navigator.of(dialogContext).pop(value),
-        onCancel: () => Navigator.of(dialogContext).pop(),
-      );
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (!cancelableOperation.isCanceled) {
-            cancelableOperation.cancel();
-            Navigator.of(dialogContext).pop();
-          }
-        },
-        child: Center(child: CircularProgressIndicator()),
-      );
-    },
-  ).then((value) {
-    if (cancelableOperation.isCanceled) return null;
-    return value;
-  });
+  final Ref ref;
+  final UserRepo _repo;
+
+  late final emailController = TextEditingController();
+  late final passwordController = TextEditingController();
+
+  Future<MapEntry<String?, User?>> handleSignIn() async {
+    return await _repo.signIn(
+      email: emailController.text,
+      password: passwordController.text,
+    );
+  }
 }
+
+final signInViewNotifier = ChangeNotifierProvider.autoDispose(
+  (ref) => SignInViewProvider(ref),
+);
