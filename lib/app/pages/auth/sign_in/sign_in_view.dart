@@ -15,11 +15,11 @@ class SignInView extends ConsumerWidget {
       body: Center(child: Text('SignInView is working')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final _result = await showAsyncOverlay(
-            context,
-            asyncFunction:
-                () async => await Future.delayed(Duration(seconds: 10)),
+          await Future.delayed(
+            Durations.extralong4,
+            () => ref.read(userRepoProvider.notifier).signIn(),
           );
+          context.router.replacePath('/client');
         },
       ),
     );

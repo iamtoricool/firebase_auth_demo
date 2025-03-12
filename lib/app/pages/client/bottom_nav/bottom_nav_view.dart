@@ -17,8 +17,8 @@ class BottomNavView extends ConsumerWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Text('Full Name: ${user.user?.fullName ?? ''}'),
-            Text('Full Name: ${user.user?.fullName ?? ''}'),
+            Text('Full Name: ${user?.fullName ?? ''}'),
+            Text('Full Name: ${user?.emailAddress ?? ''}'),
           ],
         ),
       ),

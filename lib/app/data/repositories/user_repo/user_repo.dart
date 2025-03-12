@@ -3,18 +3,22 @@ import '../../models/models.export.dart';
 
 export '../../models/models.export.dart' show UserModel;
 
-class UserRepo {
-  UserModel? user;
-  bool get isLoggedIn => user != null;
+class UserRepo extends StateNotifier<UserModel?> {
+  UserRepo() : super(null);
+
+  bool get isLoggedIn => state != null;
 
   Future<MapEntry<String?, UserModel?>> signIn() async {
     await Future.delayed(Duration(seconds: 2));
+    print('Signed In!');
 
-    return MapEntry(
-      null,
-      UserModel.mock().copyWith(lastLoggedIn: DateTime.now()),
-    );
+    final user = UserModel.mock().copyWith(lastLoggedIn: DateTime.now());
+    state = user;
+
+    return MapEntry(null, user);
   }
 }
 
-final userRepoProvider = Provider.autoDispose<UserRepo>((ref) => UserRepo());
+final userRepoProvider = StateNotifierProvider<UserRepo, UserModel?>(
+  (ref) => UserRepo(),
+);

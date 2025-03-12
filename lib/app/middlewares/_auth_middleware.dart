@@ -8,10 +8,9 @@ class AuthMiddleware extends AutoRouteGuard {
   @override
   void onNavigation(resolver, router) {
     final ref = ProviderScope.containerOf(resolver.context);
-    final userState = ref.read(userRepoProvider);
+    final userState = ref.read(userRepoProvider.notifier);
     if (!userState.isLoggedIn) {
       resolver.redirectUntil(SignInRoute());
-      // return resolver.next(false);
       return;
     }
 
