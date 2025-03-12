@@ -16,6 +16,7 @@ class SignInView extends ConsumerWidget {
       child: Builder(
         builder: (formContext) {
           return Scaffold(
+            appBar: AppBar(title: Text('Sign In')),
             body: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -54,6 +55,11 @@ class SignInView extends ConsumerWidget {
                     ),
 
                     const SizedBox.square(dimension: 24),
+
+                    InkWell(
+                      onTap: () => context.router.pushPath('/auth/sign-up'),
+                      child: Text('Sign Up'),
+                    ),
                     ElevatedButton(
                       onPressed: () async {
                         if (Form.maybeOf(formContext)?.validate() == true) {

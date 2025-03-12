@@ -32,6 +32,21 @@ class UserRepo extends AsyncNotifier<User?> {
       return MapEntry(e.toString(), null);
     }
   }
+
+  Future<MapEntry<String?, User?>> signUp({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final _result = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      state = AsyncValue.data(_result.user);
+      return MapEntry(null, state.value);
+    } catch (e) {
+      return MapEntry(e.toString(), null);
+    }
+  }
 }
 
 final userRepoProvider = AsyncNotifierProvider<UserRepo, User?>(
